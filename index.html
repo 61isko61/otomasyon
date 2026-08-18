@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Çorba Konağı</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="screen">
+    <section class="feedback-card">
+      <h1>Çorba Konağı</h1>
+
+      <p class="intro">
+        Sizlere daha iyi bir hizmet sunabilmemiz için<br>
+        geri bildirimleriniz bizim için çok değerlidir.<br>
+        Lütfen deneyiminizi paylaşın.
+      </p>
+
+      <div class="ratings" role="radiogroup" aria-label="Deneyim puanı">
+        <button class="rating" type="button" data-rating="1" role="radio" aria-checked="false">
+          <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f621.svg" alt="" class="emoji">
+          <span class="label label-1">ÇOK KÖTÜ</span>
+        </button>
+
+        <button class="rating" type="button" data-rating="2" role="radio" aria-checked="false">
+          <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f610.svg" alt="" class="emoji">
+          <span class="label label-2">KÖTÜ</span>
+        </button>
+
+        <button class="rating" type="button" data-rating="3" role="radio" aria-checked="false">
+          <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f642.svg" alt="" class="emoji">
+          <span class="label label-3">ORTALAMA</span>
+        </button>
+
+        <button class="rating" type="button" data-rating="4" role="radio" aria-checked="false">
+          <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f60a.svg" alt="" class="emoji">
+          <span class="label label-4">İYİ</span>
+        </button>
+
+        <button class="rating" type="button" data-rating="5" role="radio" aria-checked="false">
+          <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f929.svg" alt="" class="emoji">
+          <span class="label label-5">HARİKA</span>
+        </button>
+      </div>
+
+      <input type="hidden" id="selected-rating" name="rating" value="">
+    </section>
+
+    <p class="quality-note">
+      Bu işletme <strong>GooUzman</strong> kalite standartları ile analiz edilmektedir.
+    </p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
