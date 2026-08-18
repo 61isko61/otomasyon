@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bizi Değerlendirin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            text-align: center;
+            width: 100%;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+        .rating-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .rating-btn {
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .rating-btn .emoji {
+            font-size: 40px;
+        }
+        .rating-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .rating-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        .comment-section {
+            margin-bottom: 30px;
+        }
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 100px;
+        }
+        .submit-btn {
+            background: #667eea;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .submit-btn:hover:not(:disabled) {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .loading {
+            display: none;
+            color: #667eea;
+            font-weight: 600;
+        }
+        .error {
+            display: none;
+            color: #e74c3c;
+            padding: 12px;
+            background: #fadbd8;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bizi Değerlendirin</h1>
+        <p class="subtitle">Hizmetimizden memnun musunuz?</p>
+        
+        <div class="error" id="error-msg"></div>
+        
+        <div class="rating-options">
+            <button class="rating-btn" data-puan="1">
+                <span class="emoji">😠</span>
+                <span>Çok Kötü</span>
+            </button>
+            <button class="rating-btn" data-puan="2">
+                <span class="emoji">🙁</span>
+                <span>Kötü</span>
+            </button>
+            <button class="rating-btn" data-puan="3">
+                <span class="emoji">😐</span>
+                <span>Ortalama</span>
+            </button>
+            <button class="rating-btn" data-puan="4">
+                <span class="emoji">🙂</span>
+                <span>İyi</span>
+            </button>
+            <button class="rating-btn" data-puan="5">
+                <span class="emoji">🤩</span>
+                <span>Harika</span>
+            </button>
+        </div>
+
+        <div class="comment-section">
+            <textarea id="yorum" placeholder="Yorumunuz (isteğe bağlı)..."></textarea>
+        </div>
+
+        <button class="submit-btn" id="gonder-btn" disabled>Gönder</button>
+        <div class="loading" id="loading">Yükleniyor...</div>
+    </div>
+
+    <script>
+        let selectedPuan = null;
+        const slug = new URLSearchParams(window.location.search).get('isletme');
+
+        if (!slug) {
+            document.getElementById('error-msg').textContent = 'Hata: İşletme bilgisi bulunamadı';
+            document.getElementById('error-msg').style.display = 'block';
+        }
+
+        document.querySelectorAll('.rating-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedPuan = parseInt(this.dataset.puan);
+                document.getElementById('gonder-btn').disabled = false;
+                document.getElementById('error-msg').style.display = 'none';
+            });
+        });
+
+        document.getElementById('gonder-btn').addEventListener('click', async function() {
+            if (!selectedPuan) return;
+
+            const yorum = document.getElementById('yorum').value;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('gonder-btn').disabled = true;
+
+            try {
+                const response = await fetch(`/api/geri-bildirim/${slug}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ puan: selectedPuan, yorum: yorum })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.redirect) {
+                    // Redirect URL'e git
+                    window.location.href = data.redirect;
+                } else {
+                    document.getElementById('error-msg').textContent = data.hata || 'Hata oluştu!';
+                    document.getElementById('error-msg').style.display = 'block';
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('gonder-btn').disabled = false;
+                }
+            } catch (error) {
+                console.error('Hata:', error);
+                document.getElementById('error-msg').textContent = 'Bir hata oluştu. Lütfen tekrar deneyin.';
+                document.getElementById('error-msg').style.display = 'block';
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('gonder-btn').disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
