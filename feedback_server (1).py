@@ -1,6 +1,8 @@
 """
-Geri Bildirim Sunucusu v2 — SQLite + Telegram
-================================================
+Geri Bildirim Sunucusu v3 — SQLite + Telegram + Akıllı Yönlendirme
+==================================================================
+v2'den fark: İyi/Harika puanlar → Google yorumlarına, diğerleri → Detaylı feedback formuna yönlendir
+
 İlk sürümden fark: işletmeler artık kod içindeki sabit bir sözlük yerine
 küçük bir SQLite veritabanında (isletmeler.db) tutuluyor. Yeni işletme
 eklemek için bu dosyayı değiştirmenize gerek yok — add_business.py
@@ -89,6 +91,12 @@ def anasayfa():
     return send_from_directory(BASE_DIR, "sablon.html")
 
 
+@app.route("/feedback-form")
+def feedback_formu():
+    """Negatif feedback formu sayfası"""
+    return send_from_directory(BASE_DIR, "feedback-form.html")
+
+
 @app.route("/api/geri-bildirim/<slug>", methods=["POST"])
 def geri_bildirim_al(slug):
     with closing(db()) as conn:
@@ -111,6 +119,7 @@ def geri_bildirim_al(slug):
         conn.commit()
         isletme_ad = isletme["ad"]
         chat_id = isletme["telegram_chat_id"]
+        google_link = isletme["google_link"]
 
     etiket = ETIKETLER.get(puan, "belirtilmedi")
     emoji = EMOJILER.get(puan, "")
@@ -122,7 +131,14 @@ def geri_bildirim_al(slug):
         f"Zaman: {zaman}"
     )
     telegram_gonder(chat_id, mesaj)
-    return jsonify({"durum": "iletildi"})
+    
+    # İYİ (4) veya HARİKA (5) ise Google'ye, diğerleri feedback sayfasına
+    if puan in (4, 5):
+        redirect_url = google_link
+    else:
+        redirect_url = "/feedback-form"
+    
+    return jsonify({"durum": "iletildi", "redirect": redirect_url})
 
 
 @app.route("/api/telegram-webhook", methods=["POST"])
